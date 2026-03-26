@@ -45,7 +45,7 @@
 * **Syringe**（Ares 平台的注入支持头文件）
 
 ### 编译步骤
-1. 克隆本项目：`git clone https://github.com/YourName/MORandomizer.git`
+1. 克隆本项目：`git clone https://github.com/jiu-zui-90817/MORandomizer.git`
 2. 将 YRpp 和 Syringe 的头文件路径添加到 Visual Studio 的 `包含目录 (Include Directories)` 中。
 3. 将项目配置设置为 **Release | Win32**（红警 2 是 32 位游戏，切勿编译为 x64）。
 4. 按下 `Ctrl + Shift + B` 生成解决方案，输出的 `MORandomizer.dll` 即为成品。
