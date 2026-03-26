@@ -19,8 +19,8 @@
 
 ### 适合普通玩家 (小白玩家)
 1. 在 [Releases](../../releases) 页面下载最新版本的压缩包。
-2. 将 `MORandomizer.dll` 和 `MORandomizer.ini` 放入你的《心灵终结》或《红警2》游戏根目录。
-3. 启动游戏进入战局后，运行压缩包内附带的 `MOInjector.exe`（注入器）将 DLL 注入游戏进程。
+2. 将 `MORandomizer.dll` 和 `MORandomizer.ini` 放入你的《心灵终结》游戏根目录。
+3. 启动游戏进入战局后，运行压缩包内附带的 `MORandomizerLauncher.exe`（注入器）将 DLL 注入游戏进程。
 4. 在游戏中按下快捷键（默认需要按住 `Ctrl + Shift`）：
    * `W`：全图同阶级洗牌
    * `C`：全图跨物种大乱炖
