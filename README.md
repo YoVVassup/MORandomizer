@@ -46,7 +46,7 @@ The plugin is highly customisable. Edit the INI file to:
 ### Steps
 1. Clone the repository:
    ```bash
-   git clone --recursive https://github.com/your-username/MORandomizer.git
+   git clone --recursive https://github.com/YoVVassup/MORandomizer.git
    ```
    (The `--recursive` flag automatically fetches the YRpp submodule.)
 2. Open the folder in CLion with CMake or open the generated Visual Studio solution.
@@ -65,3 +65,4 @@ This project is released under the **[GPL‑3.0 License](LICENSE)**. You may fre
 - [YRpp](https://github.com/Phobos-developers/YRpp) – essential YR memory reflection library.
 - Ares / Syringe – for providing a clean DLL injection framework.
 - The Mental Omega team – for creating an incredible mod.
+- jiu-zui-90817, author of the [original project](https://github.com/jiu-zui-90817/MORandomizer). 
