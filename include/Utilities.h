@@ -17,9 +17,9 @@ int GetRandomInt(int max);
 void LogDebug(const char* format, ...);
 
 // Helper String Functions
-std::string Trim(const std::string& str);
+std::string Trim(std::string_view str) noexcept;
 void ParseListBuffer(char* buffer, std::vector<std::string>& listOut, const char* listName);
-bool EndsWithCaseInsensitive(const char* str, const char* suffix);
+bool EndsWithCaseInsensitive(const char* str, const char* suffix) noexcept;
 
 // Bleeper
 void PlayBeep(DWORD freq, DWORD duration);

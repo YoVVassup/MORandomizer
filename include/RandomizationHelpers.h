@@ -2,13 +2,15 @@
 
 #include <vector>
 #include <set>
+#include <type_traits>
 #include <YRpp.h>
 #include "Config.h"
 #include "WeaponPool.h"
 #include "Utilities.h"
-#include <type_traits>
 
-// Template for obtaining a type index from a pointer
+// ============================================================
+// Helper: get type index from pointer
+// ============================================================
 template<typename T>
 int GetTypeIndex(T* pType, const DynamicVectorClass<T*>& array) {
     for (int i = 0; i < array.Count; ++i) {
@@ -17,15 +19,16 @@ int GetTypeIndex(T* pType, const DynamicVectorClass<T*>& array) {
     return -1;
 }
 
-// Template for randomizing one type of units (infantry, vehicles, aviation, buildings)
+// ============================================================
+// Local randomization (selected units only)
+// ============================================================
 template<typename TTypeClass>
 void RandomizeUnitType(
     const std::set<TTypeClass*>& selectedTypes,
     const std::vector<WeaponSet>& backups,
     std::vector<WeaponPair>& safePool,
     const std::vector<WeaponPair>& chaosPool,
-    bool useChaosPool,
-    bool isBuilding = false)
+    bool useChaosPool)
 {
     if (selectedTypes.empty()) return;
 
@@ -38,43 +41,153 @@ void RandomizeUnitType(
 
         const auto& backup = backups[typeIdx];
 
+        // Primary weapon
         if (backup.Pri) {
             WeaponPair wp;
-            if (useChaosPool && chaosPoolSize > 0) {
+            if (useChaosPool && chaosPoolSize > 0)
                 wp = chaosPool[GetRandomInt(chaosPoolSize)];
-            } else if (safePoolSize > 0) {
+            else if (safePoolSize > 0)
                 wp = safePool[GetRandomInt(safePoolSize)];
-            } else continue;
+            else continue;
             pType->Weapon[0].WeaponType = wp.Normal;
             pType->EliteWeapon[0].WeaponType = wp.Elite;
             LogDebug("[Local] %s primary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
         }
 
+        // Secondary weapon
         if (backup.Sec) {
             WeaponPair wp;
-            if (useChaosPool && chaosPoolSize > 0) {
+            if (useChaosPool && chaosPoolSize > 0)
                 wp = chaosPool[GetRandomInt(chaosPoolSize)];
-            } else if (safePoolSize > 0) {
+            else if (safePoolSize > 0)
                 wp = safePool[GetRandomInt(safePoolSize)];
-            } else continue;
+            else continue;
             pType->Weapon[1].WeaponType = wp.Normal;
             pType->EliteWeapon[1].WeaponType = wp.Elite;
             LogDebug("[Local] %s secondary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
         }
 
-        // Special treatment for infantry (occupy weapon)
+        // Occupy weapon (infantry only)
         if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
             if (backup.Occ && SafeOccupyWeapons.size() > 0) {
                 WeaponPair wp;
-                if (useChaosPool && chaosPoolSize > 0) {
+                if (useChaosPool && chaosPoolSize > 0)
                     wp = chaosPool[GetRandomInt(chaosPoolSize)];
-                } else {
+                else {
                     int occPoolSize = static_cast<int>(SafeOccupyWeapons.size());
                     wp = SafeOccupyWeapons[GetRandomInt(occPoolSize)];
                 }
                 pType->OccupyWeapon.WeaponType = wp.Normal;
                 pType->EliteOccupyWeapon.WeaponType = wp.Elite;
                 LogDebug("[Local] Infantry %s occupant -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+            }
+        }
+    }
+}
+
+// ============================================================
+// Global randomization (same type, all units)
+// ============================================================
+template<typename TTypeClass>
+void RandomizeGlobalSameClassForType(
+    DynamicVectorClass<TTypeClass*>& typeArray,
+    const std::vector<WeaponSet>& backups,
+    std::vector<WeaponPair>& safePool,
+    std::vector<WeaponPair>& occupyPool)   // для пехоты
+{
+    if (safePool.empty()) return;
+
+    int safePoolSize = static_cast<int>(safePool.size());
+    int occPoolSize = static_cast<int>(occupyPool.size());
+
+    for (int i = 0; i < typeArray.Count; ++i) {
+        TTypeClass* pType = typeArray.Items[i];
+        if (!pType || IsWhitelisted(pType->ID)) continue;
+        if (i >= static_cast<int>(backups.size())) continue;
+
+        const auto& backup = backups[i];
+
+        // Primary
+        if (backup.Pri) {
+            WeaponPair wp = safePool[GetRandomInt(safePoolSize)];
+            pType->Weapon[0].WeaponType = wp.Normal;
+            pType->EliteWeapon[0].WeaponType = wp.Elite;
+            LogDebug("[Global] %s primary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+        }
+
+        // Secondary
+        if (backup.Sec) {
+            WeaponPair wp = safePool[GetRandomInt(safePoolSize)];
+            pType->Weapon[1].WeaponType = wp.Normal;
+            pType->EliteWeapon[1].WeaponType = wp.Elite;
+            LogDebug("[Global] %s secondary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+        }
+
+        // Occupy weapon (infantry only)
+        if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
+            if (backup.Occ && occPoolSize > 0) {
+                WeaponPair wp = occupyPool[GetRandomInt(occPoolSize)];
+                pType->OccupyWeapon.WeaponType = wp.Normal;
+                pType->EliteOccupyWeapon.WeaponType = wp.Elite;
+                LogDebug("[Global] Infantry %s occupant -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+            }
+        }
+    }
+}
+
+// ============================================================
+// Global randomization (shuffling between types)
+// ============================================================
+template<typename TTypeClass>
+void RandomizeGlobalChaosForType(
+    DynamicVectorClass<TTypeClass*>& typeArray,
+    const std::vector<WeaponSet>& backups,
+    std::vector<WeaponPair>& chaosPool,
+    std::vector<WeaponPair>& buildingSafePool,   // for buildings, if chaos is not allowed
+    bool useChaosForBuildings)
+{
+    if (chaosPool.empty()) return;
+
+    for (int i = 0; i < typeArray.Count; ++i) {
+        TTypeClass* pType = typeArray.Items[i];
+        if (!pType || IsWhitelisted(pType->ID)) continue;
+        if (i >= static_cast<int>(backups.size())) continue;
+
+        const auto& backup = backups[i];
+
+        // Selecting a pool for this type
+        std::vector<WeaponPair>* sourcePool = &chaosPool;
+        if constexpr (std::is_same_v<TTypeClass, BuildingTypeClass>) {
+            if (!useChaosForBuildings) {
+                sourcePool = &buildingSafePool;
+                if (sourcePool->empty()) continue;
+            }
+        }
+        int poolSize = static_cast<int>(sourcePool->size());
+
+        // Primary
+        if (backup.Pri) {
+            WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
+            pType->Weapon[0].WeaponType = wp.Normal;
+            pType->EliteWeapon[0].WeaponType = wp.Elite;
+            LogDebug("[Chaos] %s primary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+        }
+
+        // Secondary
+        if (backup.Sec) {
+            WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
+            pType->Weapon[1].WeaponType = wp.Normal;
+            pType->EliteWeapon[1].WeaponType = wp.Elite;
+            LogDebug("[Chaos] %s secondary -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
+        }
+
+        // Occupy weapon (infantry only)
+        if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
+            if (backup.Occ) {
+                WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
+                pType->OccupyWeapon.WeaponType = wp.Normal;
+                pType->EliteOccupyWeapon.WeaponType = wp.Elite;
+                LogDebug("[Chaos] Infantry %s occupant -> %s | %s", pType->ID, wp.Normal->ID, wp.Elite->ID);
             }
         }
     }

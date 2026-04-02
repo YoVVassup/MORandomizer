@@ -27,33 +27,33 @@ void LogDebug(const char* format, ...) {
     LogManager::Instance().Write(formatted);
 }
 
-std::string Trim(const std::string& str) {
+std::string Trim(std::string_view str) noexcept {
     size_t first = str.find_first_not_of(" \t\r\n");
-    if (first == std::string::npos) return "";
+    if (first == std::string_view::npos) return "";
     size_t last = str.find_last_not_of(" \t\r\n");
-    return str.substr(first, last - first + 1);
+    return std::string(str.substr(first, last - first + 1));
 }
 
 void ParseListBuffer(char* buffer, std::vector<std::string>& listOut, const char* listName) {
     char* p = buffer;
     std::string dumpStr = "";
     while (*p) {
-        std::string line(p);
+        std::string_view line(p);
         size_t commentPos = line.find(';');
-        if (commentPos != std::string::npos) line = line.substr(0, commentPos);
+        if (commentPos != std::string_view::npos) line = line.substr(0, commentPos);
         size_t eqPos = line.find('=');
-        if (eqPos != std::string::npos) line = line.substr(0, eqPos);
-        line = Trim(line);
-        if (!line.empty()) {
-            listOut.push_back(line);
-            dumpStr += line + " | ";
+        if (eqPos != std::string_view::npos) line = line.substr(0, eqPos);
+        std::string trimmed = Trim(line);
+        if (!trimmed.empty()) {
+            listOut.push_back(std::move(trimmed));
+            dumpStr += trimmed + " | ";
         }
         p += strlen(p) + 1;
     }
     LogDebug("[System] %s loaded %d items: %s", listName, listOut.size(), dumpStr.c_str());
 }
 
-bool EndsWithCaseInsensitive(const char* str, const char* suffix) {
+bool EndsWithCaseInsensitive(const char* str, const char* suffix) noexcept {
     if (!str || !suffix) return false;
     size_t strLen = strlen(str);
     size_t suffixLen = strlen(suffix);
