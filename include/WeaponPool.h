@@ -1,7 +1,17 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <YRpp.h>
+
+enum WeaponSlot : size_t {
+    SLOT_PRIMARY = 0,
+    SLOT_SECONDARY = 1,
+    SLOT_ELITE_PRIMARY = 2,
+    SLOT_ELITE_SECONDARY = 3,
+    SLOT_OCCUPY = 4,
+    SLOT_ELITE_OCCUPY = 5
+};
 
 struct WeaponPair {
     WeaponTypeClass* Normal;
@@ -9,9 +19,7 @@ struct WeaponPair {
 };
 
 struct WeaponSet {
-    WeaponTypeClass* Pri;   WeaponTypeClass* Sec;
-    WeaponTypeClass* EPri;  WeaponTypeClass* ESec;
-    WeaponTypeClass* Occ;   WeaponTypeClass* EOcc;
+    std::array<WeaponTypeClass*, 6> weapons = {nullptr};
 };
 
 // Global pools

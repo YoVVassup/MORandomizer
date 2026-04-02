@@ -52,7 +52,7 @@ void RandomizeSelected() {
         }
     }
 
-    // We apply randomization to each type
+    // Apply randomization to each type
     RandomizeUnitType(selectedInfTypes, BackupInfWeapons, SafeInfWeapons, GlobalChaosPool, isChaosToggleOn);
     RandomizeUnitType(selectedUnitTypes, BackupUnitWeapons, SafeUnitWeapons, GlobalChaosPool, isChaosToggleOn);
     RandomizeUnitType(selectedAirTypes, BackupAircraftWeapons, SafeAircraftWeapons, GlobalChaosPool, isChaosToggleOn);
@@ -118,42 +118,42 @@ void RestoreOriginal() {
     for (int i = 0; i < InfantryTypeClass::Array.Count; i++) {
         if (i < static_cast<int>(BackupInfWeapons.size()) && InfantryTypeClass::Array.Items[i]) {
             auto& p = InfantryTypeClass::Array.Items[i];
-            p->Weapon[0].WeaponType = BackupInfWeapons[i].Pri;
-            p->Weapon[1].WeaponType = BackupInfWeapons[i].Sec;
-            p->EliteWeapon[0].WeaponType = BackupInfWeapons[i].EPri;
-            p->EliteWeapon[1].WeaponType = BackupInfWeapons[i].ESec;
-            p->OccupyWeapon.WeaponType = BackupInfWeapons[i].Occ;
-            p->EliteOccupyWeapon.WeaponType = BackupInfWeapons[i].EOcc;
+            p->Weapon[0].WeaponType = BackupInfWeapons[i].weapons[SLOT_PRIMARY];
+            p->Weapon[1].WeaponType = BackupInfWeapons[i].weapons[SLOT_SECONDARY];
+            p->EliteWeapon[0].WeaponType = BackupInfWeapons[i].weapons[SLOT_ELITE_PRIMARY];
+            p->EliteWeapon[1].WeaponType = BackupInfWeapons[i].weapons[SLOT_ELITE_SECONDARY];
+            p->OccupyWeapon.WeaponType = BackupInfWeapons[i].weapons[SLOT_OCCUPY];
+            p->EliteOccupyWeapon.WeaponType = BackupInfWeapons[i].weapons[SLOT_ELITE_OCCUPY];
         }
     }
     // Units
     for (int i = 0; i < UnitTypeClass::Array.Count; i++) {
         if (i < static_cast<int>(BackupUnitWeapons.size()) && UnitTypeClass::Array.Items[i]) {
             auto& p = UnitTypeClass::Array.Items[i];
-            p->Weapon[0].WeaponType = BackupUnitWeapons[i].Pri;
-            p->Weapon[1].WeaponType = BackupUnitWeapons[i].Sec;
-            p->EliteWeapon[0].WeaponType = BackupUnitWeapons[i].EPri;
-            p->EliteWeapon[1].WeaponType = BackupUnitWeapons[i].ESec;
+            p->Weapon[0].WeaponType = BackupUnitWeapons[i].weapons[SLOT_PRIMARY];
+            p->Weapon[1].WeaponType = BackupUnitWeapons[i].weapons[SLOT_SECONDARY];
+            p->EliteWeapon[0].WeaponType = BackupUnitWeapons[i].weapons[SLOT_ELITE_PRIMARY];
+            p->EliteWeapon[1].WeaponType = BackupUnitWeapons[i].weapons[SLOT_ELITE_SECONDARY];
         }
     }
     // Aircraft
     for (int i = 0; i < AircraftTypeClass::Array.Count; i++) {
         if (i < static_cast<int>(BackupAircraftWeapons.size()) && AircraftTypeClass::Array.Items[i]) {
             auto& p = AircraftTypeClass::Array.Items[i];
-            p->Weapon[0].WeaponType = BackupAircraftWeapons[i].Pri;
-            p->Weapon[1].WeaponType = BackupAircraftWeapons[i].Sec;
-            p->EliteWeapon[0].WeaponType = BackupAircraftWeapons[i].EPri;
-            p->EliteWeapon[1].WeaponType = BackupAircraftWeapons[i].ESec;
+            p->Weapon[0].WeaponType = BackupAircraftWeapons[i].weapons[SLOT_PRIMARY];
+            p->Weapon[1].WeaponType = BackupAircraftWeapons[i].weapons[SLOT_SECONDARY];
+            p->EliteWeapon[0].WeaponType = BackupAircraftWeapons[i].weapons[SLOT_ELITE_PRIMARY];
+            p->EliteWeapon[1].WeaponType = BackupAircraftWeapons[i].weapons[SLOT_ELITE_SECONDARY];
         }
     }
     // Buildings
     for (int i = 0; i < BuildingTypeClass::Array.Count; i++) {
         if (i < static_cast<int>(BackupBuildingWeapons.size()) && BuildingTypeClass::Array.Items[i]) {
             auto& p = BuildingTypeClass::Array.Items[i];
-            p->Weapon[0].WeaponType = BackupBuildingWeapons[i].Pri;
-            p->Weapon[1].WeaponType = BackupBuildingWeapons[i].Sec;
-            p->EliteWeapon[0].WeaponType = BackupBuildingWeapons[i].EPri;
-            p->EliteWeapon[1].WeaponType = BackupBuildingWeapons[i].ESec;
+            p->Weapon[0].WeaponType = BackupBuildingWeapons[i].weapons[SLOT_PRIMARY];
+            p->Weapon[1].WeaponType = BackupBuildingWeapons[i].weapons[SLOT_SECONDARY];
+            p->EliteWeapon[0].WeaponType = BackupBuildingWeapons[i].weapons[SLOT_ELITE_PRIMARY];
+            p->EliteWeapon[1].WeaponType = BackupBuildingWeapons[i].weapons[SLOT_ELITE_SECONDARY];
         }
     }
 

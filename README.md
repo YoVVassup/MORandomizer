@@ -14,6 +14,9 @@
   - *Local selection* – only affects currently selected units (reads the engine’s `IsSelected` flag).
 - **🔒 Safety Filters**: Hard‑coded checks reject dummy weapons (no projectile, no warhead, range ≤2.5). External INI‑based blacklist blocks dangerous patterns (e.g., airstrike beacons, chrono weapons, spawners) that cause `C0000005` crashes.
 - **📝 Detailed Debug Logging**: Every weapon assignment is written to `MORandomizer_Debug.log` for easy troubleshooting.
+- **🔄 Hot‑reload Configuration**: Press `Ctrl+Shift+F5` (customizable) to reload `MORandomizer.ini` without restarting the game. Whitelist, blacklist, hotkeys and all settings are updated on the fly.
+- **⏱️ Action Cooldown**: A built‑in cooldown (500 ms) prevents accidental multiple triggers from holding a hotkey.
+- **🌐 Multiplayer Safety**: The mod can be automatically disabled when real human players (≥2) are present in a multiplayer match. Set `AllowMultiplayer=yes` in the INI only if you are sure **every** player has the mod installed.
 
 ## 🎮 Installation & Usage
 
@@ -28,6 +31,7 @@
    - `S` – Local shuffle (only selected units)
    - `E` – Toggle the behaviour of `S` (same‑class ↔ cross‑class)
    - `R` – Restore all original weapons
+   - `F5` – Reload configuration (requires `Ctrl+Shift`)
 
 ### ⚙️ Configuration (`MORandomizer.ini`)
 The plugin is highly customisable. Edit the INI file to:
@@ -57,6 +61,7 @@ The plugin is highly customisable. Edit the INI file to:
 - **Mental Omega 3.3.6** has heavily modified game logic. Although the plugin includes extensive crash protection, very frequent or massive shuffles during heavy combat may still trigger rare internal errors (IE / `C0000005`).
 - Enable `EnableDebugLog=yes` in the INI to generate `MORandomizer_Debug.log`. If a crash occurs, check the last logged weapon assignment and add that weapon name to the `[Blacklist]`.
 - The DLL is designed to be loaded by **Syringe** (the same injector used by Ares). No external launcher is required.
+- **Multiplayer**: By default the mod is disabled when two or more real human players are present. To enable it, you must set `AllowMultiplayer=yes` and ensure every human player has the mod installed – otherwise desyncs will occur.
 
 ## 📄 License & Credits
 This project is released under the **[GPL‑3.0 License](LICENSE)**. You may freely use, modify, and redistribute it, provided you share your changes under the same license and retain the original author credit.

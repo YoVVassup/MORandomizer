@@ -64,7 +64,7 @@ void TryAddPair(std::vector<WeaponPair>& pool, WeaponTypeClass* norm, WeaponType
 void BuildBackupsAndPools() {
     if (InfantryTypeClass::Array.Count == 0) return;
 
-    // We reserve memory to reduce re-allocations
+    // Reserve memory to reduce re-allocations
     BackupInfWeapons.reserve(InfantryTypeClass::Array.Count);
     BackupUnitWeapons.reserve(UnitTypeClass::Array.Count);
     BackupAircraftWeapons.reserve(AircraftTypeClass::Array.Count);
@@ -81,14 +81,17 @@ void BuildBackupsAndPools() {
     // Infantry
     for (int i = 0; i < InfantryTypeClass::Array.Count; i++) {
         InfantryTypeClass* pInf = InfantryTypeClass::Array.Items[i];
-        WeaponSet ws = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+        WeaponSet ws;
         if (pInf) {
-            ws.Pri = pInf->Weapon[0].WeaponType; ws.Sec = pInf->Weapon[1].WeaponType;
-            ws.EPri = pInf->EliteWeapon[0].WeaponType; ws.ESec = pInf->EliteWeapon[1].WeaponType;
-            ws.Occ = pInf->OccupyWeapon.WeaponType; ws.EOcc = pInf->EliteOccupyWeapon.WeaponType;
-            TryAddPair(SafeInfWeapons, ws.Pri, ws.EPri);
-            TryAddPair(SafeInfWeapons, ws.Sec, ws.ESec);
-            TryAddPair(SafeOccupyWeapons, ws.Occ, ws.EOcc);
+            ws.weapons[SLOT_PRIMARY] = pInf->Weapon[0].WeaponType;
+            ws.weapons[SLOT_SECONDARY] = pInf->Weapon[1].WeaponType;
+            ws.weapons[SLOT_ELITE_PRIMARY] = pInf->EliteWeapon[0].WeaponType;
+            ws.weapons[SLOT_ELITE_SECONDARY] = pInf->EliteWeapon[1].WeaponType;
+            ws.weapons[SLOT_OCCUPY] = pInf->OccupyWeapon.WeaponType;
+            ws.weapons[SLOT_ELITE_OCCUPY] = pInf->EliteOccupyWeapon.WeaponType;
+            TryAddPair(SafeInfWeapons, ws.weapons[SLOT_PRIMARY], ws.weapons[SLOT_ELITE_PRIMARY]);
+            TryAddPair(SafeInfWeapons, ws.weapons[SLOT_SECONDARY], ws.weapons[SLOT_ELITE_SECONDARY]);
+            TryAddPair(SafeOccupyWeapons, ws.weapons[SLOT_OCCUPY], ws.weapons[SLOT_ELITE_OCCUPY]);
         }
         BackupInfWeapons.push_back(ws);
     }
@@ -96,12 +99,14 @@ void BuildBackupsAndPools() {
     // Units
     for (int i = 0; i < UnitTypeClass::Array.Count; i++) {
         UnitTypeClass* pUnit = UnitTypeClass::Array.Items[i];
-        WeaponSet ws = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+        WeaponSet ws;
         if (pUnit) {
-            ws.Pri = pUnit->Weapon[0].WeaponType; ws.Sec = pUnit->Weapon[1].WeaponType;
-            ws.EPri = pUnit->EliteWeapon[0].WeaponType; ws.ESec = pUnit->EliteWeapon[1].WeaponType;
-            TryAddPair(SafeUnitWeapons, ws.Pri, ws.EPri);
-            TryAddPair(SafeUnitWeapons, ws.Sec, ws.ESec);
+            ws.weapons[SLOT_PRIMARY] = pUnit->Weapon[0].WeaponType;
+            ws.weapons[SLOT_SECONDARY] = pUnit->Weapon[1].WeaponType;
+            ws.weapons[SLOT_ELITE_PRIMARY] = pUnit->EliteWeapon[0].WeaponType;
+            ws.weapons[SLOT_ELITE_SECONDARY] = pUnit->EliteWeapon[1].WeaponType;
+            TryAddPair(SafeUnitWeapons, ws.weapons[SLOT_PRIMARY], ws.weapons[SLOT_ELITE_PRIMARY]);
+            TryAddPair(SafeUnitWeapons, ws.weapons[SLOT_SECONDARY], ws.weapons[SLOT_ELITE_SECONDARY]);
         }
         BackupUnitWeapons.push_back(ws);
     }
@@ -109,12 +114,14 @@ void BuildBackupsAndPools() {
     // Aircraft
     for (int i = 0; i < AircraftTypeClass::Array.Count; i++) {
         AircraftTypeClass* pAir = AircraftTypeClass::Array.Items[i];
-        WeaponSet ws = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+        WeaponSet ws;
         if (pAir) {
-            ws.Pri = pAir->Weapon[0].WeaponType; ws.Sec = pAir->Weapon[1].WeaponType;
-            ws.EPri = pAir->EliteWeapon[0].WeaponType; ws.ESec = pAir->EliteWeapon[1].WeaponType;
-            TryAddPair(SafeAircraftWeapons, ws.Pri, ws.EPri);
-            TryAddPair(SafeAircraftWeapons, ws.Sec, ws.ESec);
+            ws.weapons[SLOT_PRIMARY] = pAir->Weapon[0].WeaponType;
+            ws.weapons[SLOT_SECONDARY] = pAir->Weapon[1].WeaponType;
+            ws.weapons[SLOT_ELITE_PRIMARY] = pAir->EliteWeapon[0].WeaponType;
+            ws.weapons[SLOT_ELITE_SECONDARY] = pAir->EliteWeapon[1].WeaponType;
+            TryAddPair(SafeAircraftWeapons, ws.weapons[SLOT_PRIMARY], ws.weapons[SLOT_ELITE_PRIMARY]);
+            TryAddPair(SafeAircraftWeapons, ws.weapons[SLOT_SECONDARY], ws.weapons[SLOT_ELITE_SECONDARY]);
         }
         BackupAircraftWeapons.push_back(ws);
     }
@@ -122,12 +129,14 @@ void BuildBackupsAndPools() {
     // Buildings
     for (int i = 0; i < BuildingTypeClass::Array.Count; i++) {
         BuildingTypeClass* pBld = BuildingTypeClass::Array.Items[i];
-        WeaponSet ws = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+        WeaponSet ws;
         if (pBld) {
-            ws.Pri = pBld->Weapon[0].WeaponType; ws.Sec = pBld->Weapon[1].WeaponType;
-            ws.EPri = pBld->EliteWeapon[0].WeaponType; ws.ESec = pBld->EliteWeapon[1].WeaponType;
-            TryAddPair(SafeBuildingWeapons, ws.Pri, ws.EPri);
-            TryAddPair(SafeBuildingWeapons, ws.Sec, ws.ESec);
+            ws.weapons[SLOT_PRIMARY] = pBld->Weapon[0].WeaponType;
+            ws.weapons[SLOT_SECONDARY] = pBld->Weapon[1].WeaponType;
+            ws.weapons[SLOT_ELITE_PRIMARY] = pBld->EliteWeapon[0].WeaponType;
+            ws.weapons[SLOT_ELITE_SECONDARY] = pBld->EliteWeapon[1].WeaponType;
+            TryAddPair(SafeBuildingWeapons, ws.weapons[SLOT_PRIMARY], ws.weapons[SLOT_ELITE_PRIMARY]);
+            TryAddPair(SafeBuildingWeapons, ws.weapons[SLOT_SECONDARY], ws.weapons[SLOT_ELITE_SECONDARY]);
         }
         BackupBuildingWeapons.push_back(ws);
     }

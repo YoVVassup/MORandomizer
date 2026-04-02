@@ -42,7 +42,7 @@ void RandomizeUnitType(
         const auto& backup = backups[typeIdx];
 
         // Primary weapon
-        if (backup.Pri) {
+        if (backup.weapons[SLOT_PRIMARY]) {
             WeaponPair wp;
             if (useChaosPool && chaosPoolSize > 0)
                 wp = chaosPool[GetRandomInt(chaosPoolSize)];
@@ -55,7 +55,7 @@ void RandomizeUnitType(
         }
 
         // Secondary weapon
-        if (backup.Sec) {
+        if (backup.weapons[SLOT_SECONDARY]) {
             WeaponPair wp;
             if (useChaosPool && chaosPoolSize > 0)
                 wp = chaosPool[GetRandomInt(chaosPoolSize)];
@@ -69,7 +69,7 @@ void RandomizeUnitType(
 
         // Occupy weapon (infantry only)
         if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
-            if (backup.Occ && SafeOccupyWeapons.size() > 0) {
+            if (backup.weapons[SLOT_OCCUPY] && SafeOccupyWeapons.size() > 0) {
                 WeaponPair wp;
                 if (useChaosPool && chaosPoolSize > 0)
                     wp = chaosPool[GetRandomInt(chaosPoolSize)];
@@ -93,7 +93,7 @@ void RandomizeGlobalSameClassForType(
     DynamicVectorClass<TTypeClass*>& typeArray,
     const std::vector<WeaponSet>& backups,
     std::vector<WeaponPair>& safePool,
-    std::vector<WeaponPair>& occupyPool)   // для пехоты
+    std::vector<WeaponPair>& occupyPool)   // for infantry
 {
     if (safePool.empty()) return;
 
@@ -108,7 +108,7 @@ void RandomizeGlobalSameClassForType(
         const auto& backup = backups[i];
 
         // Primary
-        if (backup.Pri) {
+        if (backup.weapons[SLOT_PRIMARY]) {
             WeaponPair wp = safePool[GetRandomInt(safePoolSize)];
             pType->Weapon[0].WeaponType = wp.Normal;
             pType->EliteWeapon[0].WeaponType = wp.Elite;
@@ -116,7 +116,7 @@ void RandomizeGlobalSameClassForType(
         }
 
         // Secondary
-        if (backup.Sec) {
+        if (backup.weapons[SLOT_SECONDARY]) {
             WeaponPair wp = safePool[GetRandomInt(safePoolSize)];
             pType->Weapon[1].WeaponType = wp.Normal;
             pType->EliteWeapon[1].WeaponType = wp.Elite;
@@ -125,7 +125,7 @@ void RandomizeGlobalSameClassForType(
 
         // Occupy weapon (infantry only)
         if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
-            if (backup.Occ && occPoolSize > 0) {
+            if (backup.weapons[SLOT_OCCUPY] && occPoolSize > 0) {
                 WeaponPair wp = occupyPool[GetRandomInt(occPoolSize)];
                 pType->OccupyWeapon.WeaponType = wp.Normal;
                 pType->EliteOccupyWeapon.WeaponType = wp.Elite;
@@ -166,7 +166,7 @@ void RandomizeGlobalChaosForType(
         int poolSize = static_cast<int>(sourcePool->size());
 
         // Primary
-        if (backup.Pri) {
+        if (backup.weapons[SLOT_PRIMARY]) {
             WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
             pType->Weapon[0].WeaponType = wp.Normal;
             pType->EliteWeapon[0].WeaponType = wp.Elite;
@@ -174,7 +174,7 @@ void RandomizeGlobalChaosForType(
         }
 
         // Secondary
-        if (backup.Sec) {
+        if (backup.weapons[SLOT_SECONDARY]) {
             WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
             pType->Weapon[1].WeaponType = wp.Normal;
             pType->EliteWeapon[1].WeaponType = wp.Elite;
@@ -183,7 +183,7 @@ void RandomizeGlobalChaosForType(
 
         // Occupy weapon (infantry only)
         if constexpr (std::is_same_v<TTypeClass, InfantryTypeClass>) {
-            if (backup.Occ) {
+            if (backup.weapons[SLOT_OCCUPY]) {
                 WeaponPair wp = (*sourcePool)[GetRandomInt(poolSize)];
                 pType->OccupyWeapon.WeaponType = wp.Normal;
                 pType->EliteOccupyWeapon.WeaponType = wp.Elite;

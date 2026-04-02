@@ -12,14 +12,12 @@
 
 void(__cdecl* g_DebugLog)(const char* pFormat, ...) = (void(__cdecl*)(const char*, ...))DEBUG_LOG;
 
-// Check: the game is in multiplayer and whether there are real players (not bots)
 static bool IsMultiplayerWithRealPlayers() {
     int humanPlayers = 0;
     for (int i = 0; i < HouseClass::Array.Count; ++i) {
         HouseClass* pHouse = HouseClass::Array.Items[i];
         if (pHouse && pHouse->IsHumanPlayer) humanPlayers++;
     }
-    // If there are at least two real players, we consider it multiplayer with people
     return (humanPlayers >= 2);
 }
 
@@ -30,11 +28,13 @@ DWORD WINAPI GodHandThread(LPVOID lpParam) {
 
     LoadConfiguration();
 
-    // Checking multiplayer at startup
     if (IsMultiplayerWithRealPlayers() && !allowMultiplayer) {
         LogDebug("Multiplayer with real players detected and randomization is disabled (AllowMultiplayer=no).");
         return 0;
     }
+
+    DWORD lastActionTime = 0;
+    const DWORD COOLDOWN_MS = 500;  // minimum interval between actions
 
     while (true) {
         bool multiplayerBlock = IsMultiplayerWithRealPlayers() && !allowMultiplayer;
@@ -47,11 +47,8 @@ DWORD WINAPI GodHandThread(LPVOID lpParam) {
         bool reloadPressed = modsOk && (GetAsyncKeyState(vkReloadConfig) & 0x8000);
         if (reloadPressed && !multiplayerBlock) {
             ReloadConfiguration();
+            lastActionTime = GetTickCount(); // reset cooldown after reboot
             SleepMs(500);
-        }
-
-        if (multiplayerBlock) {
-            SleepMs(100);
             continue;
         }
 
@@ -61,11 +58,22 @@ DWORD WINAPI GodHandThread(LPVOID lpParam) {
         bool pressE = modsOk && (GetAsyncKeyState(vkToggleChaosSelect) & 0x8000);
         bool pressR = modsOk && (GetAsyncKeyState(vkRestore) & 0x8000);
 
-        if (!isBackedUp && (pressW || pressC || pressS || pressE || pressR)) {
+        bool anyAction = pressW || pressC || pressS || pressE || pressR;
+        DWORD now = GetTickCount();
+
+        if (anyAction && !multiplayerBlock) {
+            if (now - lastActionTime < COOLDOWN_MS) {
+                SleepMs(10);
+                continue;
+            }
+            lastActionTime = now;
+        }
+
+        if (!isBackedUp && anyAction && !multiplayerBlock) {
             BuildBackupsAndPools();
         }
 
-        if (isBackedUp) {
+        if (isBackedUp && !multiplayerBlock) {
             if (pressE) {
                 isChaosToggleOn = !isChaosToggleOn;
                 if (isChaosToggleOn) {
