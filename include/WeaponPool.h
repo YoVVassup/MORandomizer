@@ -14,7 +14,7 @@ struct WeaponSet {
     WeaponTypeClass* Occ;   WeaponTypeClass* EOcc;
 };
 
-// Глобальные пулы
+// Global pools
 extern std::vector<WeaponPair> SafeInfWeapons;
 extern std::vector<WeaponPair> SafeUnitWeapons;
 extern std::vector<WeaponPair> SafeAircraftWeapons;
@@ -22,14 +22,14 @@ extern std::vector<WeaponPair> SafeBuildingWeapons;
 extern std::vector<WeaponPair> SafeOccupyWeapons;
 extern std::vector<WeaponPair> GlobalChaosPool;
 
-// Бэкапы оригинальных оружий
+// Backups of original weapons
 extern std::vector<WeaponSet> BackupInfWeapons;
 extern std::vector<WeaponSet> BackupUnitWeapons;
 extern std::vector<WeaponSet> BackupAircraftWeapons;
 extern std::vector<WeaponSet> BackupBuildingWeapons;
 extern bool isBackedUp;
 
-// Функции
+// Functions
 bool IsLegalWeapon(WeaponTypeClass* pWeapon);
 bool IsWhitelisted(const char* id);
 void TryAddPair(std::vector<WeaponPair>& pool, WeaponTypeClass* norm, WeaponTypeClass* elite);

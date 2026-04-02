@@ -10,6 +10,11 @@ add_library(MORandomizer SHARED
         src/WeaponPool.cpp
         src/Randomization.cpp
         src/Utilities.cpp
+        include/Offsets.h
+        include/LogManager.h
+        include/RandomizationHelpers.h
+        include/Version.h
+        resources/version.rc
 )
 
 target_include_directories(MORandomizer PRIVATE

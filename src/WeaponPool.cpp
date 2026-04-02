@@ -6,6 +6,7 @@
 #include <UnitTypeClass.h>
 #include <AircraftTypeClass.h>
 #include <BuildingTypeClass.h>
+#include <Offsets.h>
 
 std::vector<WeaponPair> SafeInfWeapons;
 std::vector<WeaponPair> SafeUnitWeapons;
@@ -23,7 +24,7 @@ bool isBackedUp = false;
 bool IsLegalWeapon(WeaponTypeClass* pWeapon) {
     if (!pWeapon || !pWeapon->ID) return false;
 
-    if (!pWeapon->Projectile || !pWeapon->Warhead || pWeapon->Range <= 2.5) return false;
+    if (!pWeapon->Projectile || !pWeapon->Warhead || pWeapon->Range <= Offsets::MinWeaponRange) return false;
     if (EndsWithCaseInsensitive(pWeapon->ID, "AI")) return false;
 
     std::string wUpper = pWeapon->ID;
@@ -63,16 +64,19 @@ void TryAddPair(std::vector<WeaponPair>& pool, WeaponTypeClass* norm, WeaponType
 void BuildBackupsAndPools() {
     if (InfantryTypeClass::Array.Count == 0) return;
 
-    SafeInfWeapons.clear();
-    SafeUnitWeapons.clear();
-    SafeAircraftWeapons.clear();
-    SafeBuildingWeapons.clear();
-    SafeOccupyWeapons.clear();
-    GlobalChaosPool.clear();
-    BackupInfWeapons.clear();
-    BackupUnitWeapons.clear();
-    BackupAircraftWeapons.clear();
-    BackupBuildingWeapons.clear();
+    // We reserve memory to reduce re-allocations
+    BackupInfWeapons.reserve(InfantryTypeClass::Array.Count);
+    BackupUnitWeapons.reserve(UnitTypeClass::Array.Count);
+    BackupAircraftWeapons.reserve(AircraftTypeClass::Array.Count);
+    BackupBuildingWeapons.reserve(BuildingTypeClass::Array.Count);
+
+    SafeInfWeapons.reserve(InfantryTypeClass::Array.Count * 2);
+    SafeUnitWeapons.reserve(UnitTypeClass::Array.Count * 2);
+    SafeAircraftWeapons.reserve(AircraftTypeClass::Array.Count * 2);
+    SafeBuildingWeapons.reserve(BuildingTypeClass::Array.Count * 2);
+    SafeOccupyWeapons.reserve(InfantryTypeClass::Array.Count);
+    GlobalChaosPool.reserve(SafeInfWeapons.capacity() + SafeUnitWeapons.capacity() +
+                            SafeAircraftWeapons.capacity() + SafeBuildingWeapons.capacity());
 
     // Infantry
     for (int i = 0; i < InfantryTypeClass::Array.Count; i++) {
@@ -137,5 +141,5 @@ void BuildBackupsAndPools() {
     isBackedUp = true;
     LogDebug("<<< Backup completed >>>");
     PlayBeep(800, 300);
-    Sleep(200);
+    SleepMs(200);
 }

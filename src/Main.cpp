@@ -2,16 +2,18 @@
 #include <Syringe.h>
 #include <YRpp.h>
 #include <InfantryTypeClass.h>
+#include "Offsets.h"
 #include "Config.h"
 #include "WeaponPool.h"
 #include "Randomization.h"
 #include "Utilities.h"
+#include "LogManager.h"
 
-void(__cdecl* g_DebugLog)(const char* pFormat, ...) = (void(__cdecl*)(const char*, ...))0x4068E0;
+void(__cdecl* g_DebugLog)(const char* pFormat, ...) = (void(__cdecl*)(const char*, ...))DEBUG_LOG;
 
 DWORD WINAPI GodHandThread(LPVOID lpParam) {
     while (InfantryTypeClass::Array.Count == 0) {
-        Sleep(100);
+        SleepMs(100);
     }
 
     LoadConfiguration();
@@ -42,7 +44,7 @@ DWORD WINAPI GodHandThread(LPVOID lpParam) {
                     PlayBeep(2500, 100); PlayBeep(2000, 100);
                     LogDebug(">>> E toggled OFF: S-key uses class-specific pool <<<");
                 }
-                Sleep(300);
+                SleepMs(300);
             }
 
             if (pressS) RandomizeSelected();
@@ -50,12 +52,12 @@ DWORD WINAPI GodHandThread(LPVOID lpParam) {
             if (pressC) RandomizeGlobalChaos();
             if (pressR) RestoreOriginal();
         }
-        Sleep(30);
+        SleepMs(30);
     }
     return 0;
 }
 
-DEFINE_HOOK(0x7CD810, MORandomizer_ExeRun, 0x9) {
+DEFINE_HOOK(EXE_RUN, MORandomizer_ExeRun, 0x9) {
     static bool threadStarted = false;
     if (!threadStarted) {
         threadStarted = true;
@@ -68,6 +70,8 @@ DEFINE_HOOK(0x7CD810, MORandomizer_ExeRun, 0x9) {
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     if (ul_reason_for_call == DLL_PROCESS_ATTACH) {
         // Nothing
+    } else if (ul_reason_for_call == DLL_PROCESS_DETACH) {
+        LogManager::Instance().Close();
     }
     return TRUE;
 }

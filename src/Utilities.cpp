@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "LogManager.h"
 #include <windows.h>
 #include <ctime>
 #include <chrono>
@@ -11,22 +12,19 @@ int GetRandomInt(int max) {
 
 void LogDebug(const char* format, ...) {
     extern bool enableDebugLog;
-    extern std::string logFilePath;
     if (!enableDebugLog) return;
-    FILE* fp = fopen(logFilePath.c_str(), "a");
-    if (fp) {
-        time_t now = time(nullptr);
-        char timeStr[64];
-        strftime(timeStr, sizeof(timeStr), "%H:%M:%S", localtime(&now));
-        fprintf(fp, "[%s] ", timeStr);
-        va_list args;
-        va_start(args, format);
-        vfprintf(fp, format, args);
-        va_end(args);
-        fprintf(fp, "\n");
-        fflush(fp);
-        fclose(fp);
-    }
+    va_list args;
+    va_start(args, format);
+    char buffer[1024];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    time_t now = time(nullptr);
+    char timeStr[64];
+    strftime(timeStr, sizeof(timeStr), "%H:%M:%S", localtime(&now));
+    char formatted[2048];
+    snprintf(formatted, sizeof(formatted), "[%s] %s\n", timeStr, buffer);
+    LogManager::Instance().Write(formatted);
 }
 
 std::string Trim(const std::string& str) {

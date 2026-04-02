@@ -1,6 +1,8 @@
 #include "Config.h"
 #include "Utilities.h"
+#include "LogManager.h"
 #include <windows.h>
+#include "Version.h"
 
 bool enableBeeps = true;
 bool enableDebugLog = false;
@@ -73,11 +75,9 @@ void LoadConfiguration() {
     includeBldInChaos = (_stricmp(Trim(buf).c_str(), "yes") == 0);
 
     if (enableDebugLog) {
-        FILE* fp = fopen(logFilePath.c_str(), "w");
-        if (fp) {
-            fprintf(fp, "========== MORandomizer engine started ==========\n");
-            fclose(fp);
-        }
+        LogManager::Instance().Open(logFilePath);
+        LogDebug("========== MORandomizer engine started ==========");
+        LogDebug("Version: %s", MORANDOMIZER_VERSION_STRING);
     }
 
     char buffer[4096];

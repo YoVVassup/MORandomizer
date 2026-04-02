@@ -4,20 +4,27 @@
 #include <vector>
 #include <random>
 #include <windows.h>
+#include <thread>
+#include <chrono>
 
-// Глобальный генератор случайных чисел (C++11)
+// Global Random Number Generator (C++11)
 extern std::mt19937 g_Rng;
 
-// Функция для получения случайного числа в диапазоне [0, max-1]
+// Function to get a random number in the range [0, max-1]
 int GetRandomInt(int max);
 
-// Логирование в файл (если включено)
+// Logging to a file (uses LogManager)
 void LogDebug(const char* format, ...);
 
-// Вспомогательные строковые функции
+// Helper String Functions
 std::string Trim(const std::string& str);
 void ParseListBuffer(char* buffer, std::vector<std::string>& listOut, const char* listName);
 bool EndsWithCaseInsensitive(const char* str, const char* suffix);
 
-// Звуковой сигнал
+// Bleeper
 void PlayBeep(DWORD freq, DWORD duration);
+
+// Delay in milliseconds (uses std::this_thread::sleep_for)
+inline void SleepMs(int ms) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
