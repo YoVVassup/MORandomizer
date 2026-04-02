@@ -1,64 +1,67 @@
 # MORandomizer (Mental Omega / Red Alert 2 Weapon Randomizer)
 
-🎲 **MORandomizer** 是一个基于 C++ 与 YRpp 编写的《红色警戒 2：心灵终结 (Mental Omega)》内存注入扩展。它能够绕过游戏引擎的底层限制，在游戏对战中实时、动态地将场上单位的武器进行“盲盒洗牌”！
+🎲 **MORandomizer** is a C++ memory injection extension for *Command & Conquer: Red Alert 2 – Mental Omega* (and vanilla Yuri's Revenge). It dynamically shuffles unit weapons at runtime, bypassing the game engine's limitations.
 
-**想看动员兵发射光棱激光？想看坦克丢出基洛夫航弹？在这里，一切皆有可能。**
+**Ever wanted a Conscript to fire a prism laser? Or a tank to drop a Kirov bomb? Now everything is possible!**
 
-## ✨ 核心特性 (Features)
+## ✨ Features
 
-* **🛡️ 引擎级原生快照**：初始化时自动扫描并备份全图所有单位（步兵/载具/空军/建筑）的 武器槽位信息，支持一键无损恢复原厂设定。
-* **🎁 精英武器防丢机制**：普通武器与精英（三星）武器在底层成对打包发放。单位升星后绝不哑火，完美继承新武器的精英特效。
-* **🌪️ 四象限发牌引擎**：
-  * **[全局同级]**：步兵抽步兵的枪，坦克抽坦克的炮。
-  * **[跨物种大乱炖]**：打破物种隔离，步兵拿防空炮，坦克用狙击枪！
-  * **[局部精准打击]**：通过读取底层 `IsSelected` 状态，只针对你鼠标框选的单位进行单独洗牌！
-* **🔒 绝对安全查杀机制**：硬编码过滤无弹道、无伤害的逻辑假武器；外置 INI 特征码黑名单，精准拦截空袭信标、超时空冻结、建筑生成器等极易导致 `C0000005` 崩溃的元凶。
-* **📝 强制落盘黑匣子**：自带详尽的 Debug 日志输出，实时记录每一个单位武器槽位的变更历史，方便排查由于某些变态 Mod 武器引发的死锁。
+- **🛡️ Engine‑level Snapshot**: Automatically backs up all weapon slots (infantry, vehicles, aircraft, buildings) on first hotkey press. One‑key restore to factory settings.
+- **🎁 Veteran‑ready Pairing**: Normal and elite (veteran) weapons are paired together. Units never lose their firepower when ranking up.
+- **🌪️ Four Randomization Modes**:
+  - *Global same‑class* – infantry get infantry weapons, vehicles get vehicle weapons.
+  - *Cross‑class chaos* – break the rules: infantry can carry AA guns, tanks can use sniper rifles.
+  - *Local selection* – only affects currently selected units (reads the engine’s `IsSelected` flag).
+- **🔒 Safety Filters**: Hard‑coded checks reject dummy weapons (no projectile, no warhead, range ≤2.5). External INI‑based blacklist blocks dangerous patterns (e.g., airstrike beacons, chrono weapons, spawners) that cause `C0000005` crashes.
+- **📝 Detailed Debug Logging**: Every weapon assignment is written to `MORandomizer_Debug.log` for easy troubleshooting.
 
-## 🎮 安装与使用 (Usage)
+## 🎮 Installation & Usage
 
-### 适合普通玩家 (小白玩家)
-1. 在 [Releases](../../releases) 页面下载最新版本的压缩包。
-2. 将 `MORandomizer.dll` 和 `MORandomizer.ini` 放入你的《心灵终结》游戏根目录。
-3. 启动游戏进入战局后，运行压缩包内附带的 `MORandomizerLauncher.exe`（注入器）将 DLL 注入游戏进程。
-4. 在游戏中按下快捷键（默认需要按住 `Ctrl + Shift`）：
-   * `W`：全图同类型单位洗牌
-   * `C`：全图跨类型大乱炖
-   * `S`：局部精准洗牌（仅对当前选中的单位类型发牌）
-   * `E`：状态开关（切换 S 键是发同级武器，还是跨类型大杂烩）
-   * `R`：一键恢复原厂设定
+### For Players
+1. Download the latest release from the [Releases](../../releases) page.
+2. Place `MORandomizer.dll` and `MORandomizer.ini` into your *Mental Omega* game folder (where `gamemd.exe` and `Syringe.exe` reside).
+3. Ensure the DLL is loaded by Syringe, or let Syringe auto‑detect it (the DLL exports a hook at `0x7CD810`).
+4. Launch the game via Syringe (e.g., double‑click `Syringe.exe` or use the game launcher).
+5. In a match, hold the modifier keys (default `Ctrl + Shift`) and press:
+   - `W` – Global same‑class shuffle
+   - `C` – Global cross‑class chaos
+   - `S` – Local shuffle (only selected units)
+   - `E` – Toggle the behaviour of `S` (same‑class ↔ cross‑class)
+   - `R` – Restore all original weapons
 
-### ⚙️ 配置文件 (MORandomizer.ini)
-插件具有极高的可玩性与自定义空间。你可以通过修改 `MORandomizer.ini` 来实现：
-* 修改快捷键映射。
-* 决定建筑、空军是否参与变异。
-* 在 `[Whitelist]` 中添加不想被洗牌的平民或英雄代码。
-* 在 `[Blacklist]` 中追加容易引起弹窗的危险武器词根（支持模糊匹配）。
+### ⚙️ Configuration (`MORandomizer.ini`)
+The plugin is highly customisable. Edit the INI file to:
+- Change hotkeys and modifier key requirements.
+- Enable/disable randomization for infantry, vehicles, aircraft, or buildings.
+- Add units to the `[Whitelist]` (they will never be affected).
+- Extend the `[Blacklist]` with weapon name patterns that should be excluded from the pool.
 
-## 🛠️ 编译指南 (For Developers)
+## 🛠️ Building from Source
 
-本插件基于 **YRpp** 底层头文件库开发。如果你想自行编译或进行二次开发：
+### Dependencies
+- **Visual Studio** (2019 or 2022, with **x86** toolchain)
+- **[YRpp](https://github.com/Phobos-developers/YRpp)** – header‑only library for YR memory reflection
+- **Syringe** headers (provided with Ares)
 
-### 环境依赖
-* **Visual Studio** (推荐 2019 或 2022)
-* **[YRpp](https://github.com/Phobos-developers/YRpp)** 库（用于红警 2 内存类的反射）
-* **Syringe**（Ares 平台的注入支持头文件）
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone --recursive https://github.com/your-username/MORandomizer.git
+   ```
+   (The `--recursive` flag automatically fetches the YRpp submodule.)
+2. Open the folder in CLion with CMake or open the generated Visual Studio solution.
+3. Build the project in **Release | Win32** (the game is 32‑bit).
+4. The output `MORandomizer.dll` will be placed in the `Release/` folder, along with a copy of `MORandomizer.ini`.
 
-### 编译步骤
-1. 克隆本项目：`git clone https://github.com/jiu-zui-90817/MORandomizer.git`
-2. 将 YRpp 和 Syringe 的头文件路径添加到 Visual Studio 的 `包含目录 (Include Directories)` 中。
-3. 将项目配置设置为 **Release | Win32**（红警 2 是 32 位游戏，切勿编译为 x64）。
-4. 按下 `Ctrl + Shift + B` 生成解决方案，输出的 `MORandomizer.dll` 即为成品。
+## ⚠️ Important Notes
+- **Mental Omega 3.3.6** has heavily modified game logic. Although the plugin includes extensive crash protection, very frequent or massive shuffles during heavy combat may still trigger rare internal errors (IE / `C0000005`).
+- Enable `EnableDebugLog=yes` in the INI to generate `MORandomizer_Debug.log`. If a crash occurs, check the last logged weapon assignment and add that weapon name to the `[Blacklist]`.
+- The DLL is designed to be loaded by **Syringe** (the same injector used by Ares). No external launcher is required.
 
-## ⚠️ 终极警告 (Warning)
-《心灵终结 3.3.6》的底层逻辑极其复杂（如焚风阵营的高度魔改机制）。尽管本插件已经内置了海量的崩溃防御逻辑，但**过度频繁的洗牌或在交火密集期强行大乱炖，仍有极低概率引发游戏底层的内存指针越界（IE报错）**。
-建议开启 `MORandomizer.ini` 中的黑匣子日志功能，如遇报错，请查阅日志最后一行分配的武器，并将其特征词加入黑名单。
+## 📄 License & Credits
+This project is released under the **[GPL‑3.0 License](LICENSE)**. You may freely use, modify, and redistribute it, provided you share your changes under the same license and retain the original author credit.
 
-## 📄 开源协议 & 鸣谢 (License & Credits)
-本项目核心逻辑基于 **[GPL-3.0 License](LICENSE)** 开源。
-你可以自由地使用、修改并将其整合到你的《心灵终结》或其他红警 2 扩展版中，但**必须**同样以开源形式共享你的修改，并保留原作者署名。
-
-**特别鸣谢 (Special Thanks):**
-* 感谢 [YRpp](https://github.com/Phobos-developers/YRpp) 提供的底层内存反射库。
-* 感谢 Ares/Syringe 提供的完美 DLL 注入环境。
-* 感谢 Mental Omega (心灵终结) 制作组带来的极致游戏体验。
+**Special Thanks:**
+- [YRpp](https://github.com/Phobos-developers/YRpp) – essential YR memory reflection library.
+- Ares / Syringe – for providing a clean DLL injection framework.
+- The Mental Omega team – for creating an incredible mod.

@@ -1,0 +1,80 @@
+# CMake build directories
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# Visual Studio specific
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# Output directories
+Debug/
+Release/
+x64/
+x86/
+Win32/
+Build/
+out/
+
+# Object and library files
+*.o
+*.obj
+*.lib
+*.dll
+*.exp
+*.pdb
+*.ilk
+*.exe
+*.exe.manifest
+*.dll.manifest
+
+# Compiled resource files
+*.res
+
+# Logs and debug files
+*.log
+MORandomizer_Debug.log
+debug.log
+Syringe.log
+
+# Backup and temporary files
+*.bak
+*.tmp
+*~
+*.swp
+*.swo
+
+# User-specific files (JetBrains CLion)
+.idea/
+.idea/.gitignore
+*.iml
+
+# Compiled Python (if any)
+__pycache__/
+*.pyc
+
+# Archive files
+*.zip
+*.7z
+*.rar
+
+# CMake user presets
+CMakeUserPresets.json
+
+# ReSharper
+_ReSharper.Caches/
+
+# Visual Studio Code
+*.code-workspace
