@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "Utilities.h"
 #include "LogManager.h"
+#include "WeaponPool.h"
 #include <windows.h>
 #include "Version.h"
 
@@ -17,6 +18,7 @@ int vkChaosMode = 'C';
 int vkSelectedRandom = 'S';
 int vkToggleChaosSelect = 'E';
 int vkRestore = 'R';
+int vkReloadConfig = VK_F5;
 
 bool randInfantry = true;
 bool randUnits = true;
@@ -25,9 +27,17 @@ bool randBuildings = true;
 bool includeBldInChaos = false;
 
 bool isChaosToggleOn = false;
+bool allowMultiplayer = false;
 
 std::vector<std::string> WhiteList;
 std::vector<std::string> SuperWeaponBlacklist;
+
+// Helper function to read a string from INI
+static std::string ReadIniString(const char* section, const char* key, const char* def, const char* iniPath) {
+    char buf[256];
+    GetPrivateProfileStringA(section, key, def, buf, sizeof(buf), iniPath);
+    return Trim(buf);
+}
 
 void LoadConfiguration() {
     char iniPath[MAX_PATH];
@@ -38,54 +48,71 @@ void LoadConfiguration() {
     size_t pos = logFilePath.find_last_of("\\/");
     logFilePath = logFilePath.substr(0, pos) + "\\MORandomizer_Debug.log";
 
-    char buf[32];
-    GetPrivateProfileStringA("Settings", "EnableBeep", "yes", buf, sizeof(buf), iniPath);
-    enableBeeps = (_stricmp(Trim(buf).c_str(), "no") != 0);
-    GetPrivateProfileStringA("Settings", "EnableDebugLog", "no", buf, sizeof(buf), iniPath);
-    enableDebugLog = (_stricmp(Trim(buf).c_str(), "yes") == 0);
+    // Reading settings
+    enableBeeps        = (_stricmp(ReadIniString("Settings", "EnableBeep", "yes", iniPath).c_str(), "no") != 0);
+    enableDebugLog     = (_stricmp(ReadIniString("Settings", "EnableDebugLog", "no", iniPath).c_str(), "yes") == 0);
+    requireCtrl        = (_stricmp(ReadIniString("Settings", "RequireCtrl", "yes", iniPath).c_str(), "yes") == 0);
+    requireShift       = (_stricmp(ReadIniString("Settings", "RequireShift", "no", iniPath).c_str(), "yes") == 0);
+    requireAlt         = (_stricmp(ReadIniString("Settings", "RequireAlt", "no", iniPath).c_str(), "yes") == 0);
+    allowMultiplayer   = (_stricmp(ReadIniString("Settings", "AllowMultiplayer", "no", iniPath).c_str(), "yes") == 0);
 
-    GetPrivateProfileStringA("Settings", "RequireCtrl", "yes", buf, sizeof(buf), iniPath);
-    requireCtrl = (_stricmp(Trim(buf).c_str(), "yes") == 0);
-    GetPrivateProfileStringA("Settings", "RequireShift", "no", buf, sizeof(buf), iniPath);
-    requireShift = (_stricmp(Trim(buf).c_str(), "yes") == 0);
-    GetPrivateProfileStringA("Settings", "RequireAlt", "no", buf, sizeof(buf), iniPath);
-    requireAlt = (_stricmp(Trim(buf).c_str(), "yes") == 0);
+    std::string key = ReadIniString("Settings", "KeyRandomWeapons", "W", iniPath);
+    if (!key.empty()) vkRandomWeapons = std::toupper(key[0]);
+    key = ReadIniString("Settings", "KeyChaosMode", "C", iniPath);
+    if (!key.empty()) vkChaosMode = std::toupper(key[0]);
+    key = ReadIniString("Settings", "KeySelectedRandom", "S", iniPath);
+    if (!key.empty()) vkSelectedRandom = std::toupper(key[0]);
+    key = ReadIniString("Settings", "KeyToggleChaos", "E", iniPath);
+    if (!key.empty()) vkToggleChaosSelect = std::toupper(key[0]);
+    key = ReadIniString("Settings", "KeyRestore", "R", iniPath);
+    if (!key.empty()) vkRestore = std::toupper(key[0]);
+    key = ReadIniString("Settings", "KeyReloadConfig", "F5", iniPath);
+    if (!key.empty() && key.length() == 1) {
+        vkReloadConfig = std::toupper(key[0]);
+    } else if (_stricmp(key.c_str(), "F5") == 0) {
+        vkReloadConfig = VK_F5;
+    }
 
-    GetPrivateProfileStringA("Settings", "KeyRandomWeapons", "W", buf, sizeof(buf), iniPath);
-    if (!Trim(buf).empty()) vkRandomWeapons = std::toupper(static_cast<unsigned char>(Trim(buf)[0]));
-    GetPrivateProfileStringA("Settings", "KeyChaosMode", "C", buf, sizeof(buf), iniPath);
-    if (!Trim(buf).empty()) vkChaosMode = std::toupper(static_cast<unsigned char>(Trim(buf)[0]));
-    GetPrivateProfileStringA("Settings", "KeySelectedRandom", "S", buf, sizeof(buf), iniPath);
-    if (!Trim(buf).empty()) vkSelectedRandom = std::toupper(static_cast<unsigned char>(Trim(buf)[0]));
-    GetPrivateProfileStringA("Settings", "KeyToggleChaos", "E", buf, sizeof(buf), iniPath);
-    if (!Trim(buf).empty()) vkToggleChaosSelect = std::toupper(static_cast<unsigned char>(Trim(buf)[0]));
-    GetPrivateProfileStringA("Settings", "KeyRestore", "R", buf, sizeof(buf), iniPath);
-    if (!Trim(buf).empty()) vkRestore = std::toupper(static_cast<unsigned char>(Trim(buf)[0]));
+    randInfantry       = (_stricmp(ReadIniString("Settings", "RandomizeInfantry", "yes", iniPath).c_str(), "no") != 0);
+    randUnits          = (_stricmp(ReadIniString("Settings", "RandomizeUnits", "yes", iniPath).c_str(), "no") != 0);
+    randAircraft       = (_stricmp(ReadIniString("Settings", "RandomizeAircraft", "yes", iniPath).c_str(), "no") != 0);
+    randBuildings      = (_stricmp(ReadIniString("Settings", "RandomizeBuildings", "yes", iniPath).c_str(), "no") != 0);
+    includeBldInChaos  = (_stricmp(ReadIniString("Settings", "IncludeBuildingsInChaos", "no", iniPath).c_str(), "yes") == 0);
 
-    GetPrivateProfileStringA("Settings", "RandomizeInfantry", "yes", buf, sizeof(buf), iniPath);
-    randInfantry = (_stricmp(Trim(buf).c_str(), "no") != 0);
-    GetPrivateProfileStringA("Settings", "RandomizeUnits", "yes", buf, sizeof(buf), iniPath);
-    randUnits = (_stricmp(Trim(buf).c_str(), "no") != 0);
-    GetPrivateProfileStringA("Settings", "RandomizeAircraft", "yes", buf, sizeof(buf), iniPath);
-    randAircraft = (_stricmp(Trim(buf).c_str(), "no") != 0);
-    GetPrivateProfileStringA("Settings", "RandomizeBuildings", "yes", buf, sizeof(buf), iniPath);
-    randBuildings = (_stricmp(Trim(buf).c_str(), "no") != 0);
-
-    GetPrivateProfileStringA("Settings", "IncludeBuildingsInChaos", "no", buf, sizeof(buf), iniPath);
-    includeBldInChaos = (_stricmp(Trim(buf).c_str(), "yes") == 0);
+    // White and black lists
+    WhiteList.clear();
+    SuperWeaponBlacklist.clear();
+    char buffer[4096];
+    memset(buffer, 0, sizeof(buffer));
+    GetPrivateProfileSectionA("Whitelist", buffer, sizeof(buffer), iniPath);
+    ParseListBuffer(buffer, WhiteList, "Unit Whitelist");
+    memset(buffer, 0, sizeof(buffer));
+    GetPrivateProfileSectionA("Blacklist", buffer, sizeof(buffer), iniPath);
+    ParseListBuffer(buffer, SuperWeaponBlacklist, "Weapon Blacklist");
 
     if (enableDebugLog) {
         LogManager::Instance().Open(logFilePath);
         LogDebug("========== MORandomizer engine started ==========");
         LogDebug("Version: %s", MORANDOMIZER_VERSION_STRING);
+        LogDebug("Multiplayer allowed: %s", allowMultiplayer ? "yes" : "no");
     }
+}
 
-    char buffer[4096];
-    memset(buffer, 0, sizeof(buffer));
-    GetPrivateProfileSectionA("Whitelist", buffer, sizeof(buffer), iniPath);
-    ParseListBuffer(buffer, WhiteList, "Unit Whitelist");
-
-    memset(buffer, 0, sizeof(buffer));
-    GetPrivateProfileSectionA("Blacklist", buffer, sizeof(buffer), iniPath);
-    ParseListBuffer(buffer, SuperWeaponBlacklist, "Weapon Blacklist");
+// Configuration reload function (without recreating backups)
+void ReloadConfiguration() {
+    LogDebug(">>> Reloading configuration... <<<");
+    LoadConfiguration();
+    isBackedUp = false;
+    SafeInfWeapons.clear();
+    SafeUnitWeapons.clear();
+    SafeAircraftWeapons.clear();
+    SafeBuildingWeapons.clear();
+    SafeOccupyWeapons.clear();
+    GlobalChaosPool.clear();
+    BackupInfWeapons.clear();
+    BackupUnitWeapons.clear();
+    BackupAircraftWeapons.clear();
+    BackupBuildingWeapons.clear();
+    LogDebug("<<< Configuration reloaded. Pools will be rebuilt on next action. <<<");
+    PlayBeep(1000, 200);
 }
